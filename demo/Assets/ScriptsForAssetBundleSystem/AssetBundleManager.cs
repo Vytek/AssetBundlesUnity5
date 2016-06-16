@@ -409,7 +409,7 @@ public class AssetBundleManager : MonoBehaviour
 #endif
 		{
 			LoadAssetBundle (assetBundleName);
-			operation = new AssetBundleLoadLevelOperation (assetBundleName, levelName, isAdditive);
+			operation = new AssetBundleLoadLevelOperation (assetBundleName, levelName);
 
 			m_InProgressOperations.Add (operation);
 		}

@@ -12,7 +12,7 @@ public class LoadAssets : BaseLoader {
 		yield return StartCoroutine(Initialize() );
 
 		// Load asset.
-		yield return StartCoroutine(Load (assetBundleName, assetName) );
+		yield return StartCoroutine(Load (assetBundleName, assetName, null) );
 
 		// Unload assetBundles.
 		AssetBundleManager.UnloadAssetBundle(assetBundleName);

@@ -6,30 +6,27 @@ using System.Collections.Generic;
 public class AssetLoader : BaseLoader
 {
 	private static AssetLoader msInstance = null;
-	private const string ObjectName = "AssetLoader";
-
-	public static AssetLoader Instance
-	{
-		get
-		{
-			if (msInstance == null)
-			{
-				msInstance = new GameObject( ObjectName, typeof( AssetLoader ) ).GetComponent<AssetLoader>();
-			}
-
-			return msInstance;
-		}
-	}
 
 	private static bool isReady = false;
 
-	public bool IsReady
+	public static bool IsReady
 	{
 		get
 		{
 			return isReady;
 		}
 	}
+
+    void Awake()
+    {
+        msInstance = this;
+    }
+
+    void OnDestroy()
+    {
+        msInstance = null;
+        isReady = false;
+    }
 
 	IEnumerator Start()
 	{
@@ -39,7 +36,7 @@ public class AssetLoader : BaseLoader
 
 	public static void LoadRequest( string assetBundleName, string assetName, Action<UnityEngine.Object> callback )
 	{
-		AssetLoader.Instance.StartCoroutine( AssetLoader.Instance.Load( assetBundleName, assetName, ( assetObject ) =>
+        AssetLoader.msInstance.StartCoroutine(AssetLoader.msInstance.Load(assetBundleName, assetName, (assetObject) =>
 		{
 			if (callback != null)
 			{
