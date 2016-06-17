@@ -42,13 +42,7 @@ public class AssetLoader : BaseLoader
 
 	protected static IEnumerator LoadAutoUnload(string assetBundleName, string assetName, Action<UnityEngine.Object> callback)
 	{
-		yield return AssetLoader.ms_Instance.Load(assetBundleName, assetName, (assetObject) =>
-		{
-			if (callback != null)
-			{
-				callback(assetObject);
-			}
-		});
+		yield return AssetLoader.ms_Instance.Load(assetBundleName, assetName, callback);
 
 		yield return new WaitForSeconds(BUNDLE_HOLD_SECONDS);
 
