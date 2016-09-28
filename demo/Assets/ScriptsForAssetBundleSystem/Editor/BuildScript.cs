@@ -37,8 +37,8 @@ public class BuildScript
 			return;
 
 		// Build and copy AssetBundles.
-		BuildScript.BuildAssetBundles();
-		BuildScript.CopyAssetBundlesTo(Path.Combine(Application.streamingAssetsPath, kAssetBundlesOutputPath) );
+		BuildAssetBundles();
+		CopyAssetBundlesTo(Path.Combine(Application.streamingAssetsPath, kAssetBundlesOutputPath) );
 
 		BuildOptions option = EditorUserBuildSettings.development ? BuildOptions.Development : BuildOptions.None;
 		BuildPipeline.BuildPlayer(levels, outputPath + targetName, EditorUserBuildSettings.activeBuildTarget, option);
@@ -53,13 +53,12 @@ public class BuildScript
 		case BuildTarget.StandaloneWindows:
 		case BuildTarget.StandaloneWindows64:
 			return "/test.exe";
+		case BuildTarget.iOS:
+			return "";
 		case BuildTarget.StandaloneOSXIntel:
 		case BuildTarget.StandaloneOSXIntel64:
 		case BuildTarget.StandaloneOSXUniversal:
 			return "/test.app";
-		case BuildTarget.WebPlayer:
-		case BuildTarget.WebPlayerStreamed:
-			return "";
 			// Add more build targets for your own.
 		default:
 			Debug.Log("Target not implemented.");
