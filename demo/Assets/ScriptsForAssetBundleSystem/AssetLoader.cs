@@ -20,6 +20,7 @@ public class AssetLoader : BaseLoader
 
 	void Awake()
 	{
+		isReady = false;
 		ms_Instance = this;
 	}
 
@@ -37,35 +38,35 @@ public class AssetLoader : BaseLoader
 
 	public static void LoadAssetAsync( string assetBundleName, string assetName, Action<UnityEngine.Object> callback )
 	{
-		AssetLoader.ms_Instance.StartCoroutine(LoadAutoUnload(assetBundleName, assetName, callback));
+		ms_Instance.StartCoroutine(LoadAutoUnload(assetBundleName, assetName, callback));
 	}
 
 	protected static IEnumerator LoadAutoUnload(string assetBundleName, string assetName, Action<UnityEngine.Object> callback)
 	{
-		yield return AssetLoader.ms_Instance.Load(assetBundleName, assetName, callback);
+		yield return ms_Instance.Load(assetBundleName, assetName, callback);
 
 		yield return new WaitForSeconds(BUNDLE_HOLD_SECONDS);
 
 		AssetBundleManager.UnloadAssetBundle(assetBundleName);
 	}
 
+	public static void LoadAssetBundleLoadAllAssetsAsync(string assetBundleName, Action<AssetBundle> callback)
+	{
+		ms_Instance.StartCoroutine(ms_Instance.LoadAssetBundleLoadAllAssets(assetBundleName, callback));
+	}
+
 	public static void LoadLevelAsync(string assetBundleName, string levelName, bool isAdditive, Action completeCallback)
 	{
-		AssetLoader.ms_Instance.StartCoroutine(LoadLevelProxy(assetBundleName, levelName, isAdditive, completeCallback));
+		ms_Instance.StartCoroutine(LoadLevelProxy(assetBundleName, levelName, isAdditive, completeCallback));
 	}
 
 	protected static IEnumerator LoadLevelProxy(string assetBundleName, string levelName, bool isAdditive, Action completeCallback)
 	{
-		yield return AssetLoader.ms_Instance.LoadLevel(assetBundleName, levelName, isAdditive);
+		yield return ms_Instance.LoadLevel(assetBundleName, levelName, isAdditive);
 
 		if (completeCallback != null)
 		{
 			completeCallback();
 		}
-	}
-
-	public static void UnloadScene(string sceneName)
-	{
-		SceneManager.UnloadScene(sceneName);
 	}
 }

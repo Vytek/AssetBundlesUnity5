@@ -199,3 +199,82 @@ public class AssetBundleLoadManifestOperation : AssetBundleLoadAssetOperationFul
 	}
 }
 
+public abstract class AssetBundleLoadAllAssetsOperation : AssetBundleLoadOperation
+{
+	public abstract AssetBundle GetAssetBundle();
+}
+
+public class AssetBundleLoadAllAssetsOperationSimulation : AssetBundleLoadAllAssetsOperation
+{
+	public AssetBundleLoadAllAssetsOperationSimulation()
+	{
+
+	}
+
+	public override AssetBundle GetAssetBundle()
+	{
+		return null;
+	}
+
+	public override bool Update()
+	{
+		return false;
+	}
+
+	public override bool IsDone()
+	{
+		return true;
+	}
+}
+
+public class AssetBundleLoadAllAssetsOperationFull : AssetBundleLoadAllAssetsOperation
+{
+	protected string				m_AssetBundleName;
+	protected string				m_DownloadingError;
+	protected AssetBundleRequest	m_Request = null;
+	protected AssetBundle			m_AssetBundle = null;
+
+	public AssetBundleLoadAllAssetsOperationFull(string assetBundleName)
+	{
+		m_AssetBundleName = assetBundleName;
+	}
+
+	public override AssetBundle GetAssetBundle()
+	{
+		if (m_Request != null && m_Request.isDone)
+			return m_AssetBundle;
+		else
+			return null;
+	}
+
+	public override bool Update()
+	{
+		if (m_Request != null)
+			return false;
+
+		LoadedAssetBundle bundle = AssetBundleManager.GetLoadedAssetBundle(m_AssetBundleName, out m_DownloadingError);
+		if (bundle != null)
+		{
+			m_AssetBundle = bundle.m_AssetBundle;
+			m_Request = m_AssetBundle.LoadAllAssetsAsync();
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+
+	public override bool IsDone()
+	{
+		// Return if meeting downloading error.
+		// m_DownloadingError might come from the dependency downloading.
+		if (m_Request == null && m_DownloadingError != null)
+		{
+			Debug.LogError(m_DownloadingError);
+			return true;
+		}
+
+		return m_Request != null && m_Request.isDone;
+	}
+}

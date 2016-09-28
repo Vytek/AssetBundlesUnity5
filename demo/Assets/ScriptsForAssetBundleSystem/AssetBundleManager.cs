@@ -244,9 +244,11 @@ public class AssetBundleManager : MonoBehaviour
 			
 		for (int i=0;i<dependencies.Length;i++)
 			dependencies[i] = RemapVariantName (dependencies[i]);
-			
+
 		// Record and load all dependencies.
-		m_Dependencies.Add(assetBundleName, dependencies);
+		if (!m_Dependencies.ContainsKey(assetBundleName))
+			m_Dependencies.Add(assetBundleName, dependencies);
+
 		for (int i=0;i<dependencies.Length;i++)
 			LoadAssetBundleInternal(dependencies[i], false);
 	}
@@ -279,8 +281,6 @@ public class AssetBundleManager : MonoBehaviour
 		{
 			UnloadAssetBundleInternal(dependency);
 		}
-
-		m_Dependencies.Remove(assetBundleName);
 	}
 
 	static protected void UnloadAssetBundleInternal(string assetBundleName)
@@ -297,6 +297,9 @@ public class AssetBundleManager : MonoBehaviour
 				bundle.m_AssetBundle.Unload( false );
 			}
 			m_LoadedAssetBundles.Remove(assetBundleName);
+
+			if (m_Dependencies.ContainsKey(assetBundleName))
+				m_Dependencies.Remove(assetBundleName);
 			//Debug.Log("AssetBundle " + assetBundleName + " has been unloaded successfully");
 		}
 	}
@@ -412,6 +415,36 @@ public class AssetBundleManager : MonoBehaviour
 			operation = new AssetBundleLoadLevelOperation (assetBundleName, levelName, isAdditive);
 
 			m_InProgressOperations.Add (operation);
+		}
+
+		return operation;
+	}
+
+	static public AssetBundleLoadAllAssetsOperation LoadAssetBundleLoadAllAssetsAsync(string assetBundleName)
+	{
+		AssetBundleLoadAllAssetsOperation operation = null;
+#if UNITY_EDITOR
+		if (SimulateAssetBundleInEditor)
+		{
+			string[] assetBundlePaths = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleName);
+			if (assetBundlePaths.Length == 0)
+			{
+				///@TODO: The error needs to differentiate that an asset bundle name doesn't exist
+				//        from that there right scene does not exist in the asset bundle...
+
+				Debug.LogError("There is no asset bundle with name \"" + assetBundleName + "\"");
+				return null;
+			}
+
+			operation = new AssetBundleLoadAllAssetsOperationSimulation();
+		}
+		else
+#endif
+		{
+			LoadAssetBundle(assetBundleName);
+			operation = new AssetBundleLoadAllAssetsOperationFull(assetBundleName);
+
+			m_InProgressOperations.Add(operation);
 		}
 
 		return operation;

@@ -45,13 +45,15 @@ public class BaseLoader : MonoBehaviour {
 	public string GetRelativePath()
 	{
 		if (Application.isEditor)
-			return "file://" +  System.Environment.CurrentDirectory.Replace("\\", "/"); // Use the build output folder directly.
+			return "file://" + System.Environment.CurrentDirectory.Replace("\\", "/"); // Use the build output folder directly.
 		else if (Application.isWebPlayer)
-			return System.IO.Path.GetDirectoryName(Application.absoluteURL).Replace("\\", "/")+ "/StreamingAssets";
+			return System.IO.Path.GetDirectoryName(Application.absoluteURL).Replace("\\", "/") + "/StreamingAssets";
+		else if (Application.platform == RuntimePlatform.IPhonePlayer)
+			return "file://" + Application.streamingAssetsPath;
 		else if (Application.isMobilePlatform || Application.isConsolePlatform)
 			return Application.streamingAssetsPath;
 		else // For standalone player.
-			return "file://" +  Application.streamingAssetsPath;
+			return "file://" + Application.streamingAssetsPath;
 	}
 
 #if UNITY_EDITOR
@@ -63,8 +65,6 @@ public class BaseLoader : MonoBehaviour {
 			return "Android";
 		case BuildTarget.iOS:
 			return "iOS";
-		case BuildTarget.WebPlayer:
-			return "WebPlayer";
 		case BuildTarget.StandaloneWindows:
 		case BuildTarget.StandaloneWindows64:
 			return "Windows";
@@ -88,9 +88,6 @@ public class BaseLoader : MonoBehaviour {
 			return "Android";
 		case RuntimePlatform.IPhonePlayer:
 			return "iOS";
-		case RuntimePlatform.WindowsWebPlayer:
-		case RuntimePlatform.OSXWebPlayer:
-			return "WebPlayer";
 		case RuntimePlatform.WindowsPlayer:
 			return "Windows";
 		case RuntimePlatform.OSXPlayer:
@@ -119,6 +116,21 @@ public class BaseLoader : MonoBehaviour {
 		if (prefab != null && callback != null)
 		{
 			callback( prefab );
+		}
+	}
+
+	protected IEnumerator LoadAssetBundleLoadAllAssets(string assetBundleName, Action<AssetBundle> callback)
+	{
+		Debug.Log("Start to load " + assetBundleName + " at frame " + Time.frameCount);
+
+		AssetBundleLoadAllAssetsOperation request = AssetBundleManager.LoadAssetBundleLoadAllAssetsAsync(assetBundleName);
+		if (request == null)
+			yield break;
+		yield return StartCoroutine(request);
+
+		if (callback != null)
+		{
+			callback(request.GetAssetBundle());
 		}
 	}
 
