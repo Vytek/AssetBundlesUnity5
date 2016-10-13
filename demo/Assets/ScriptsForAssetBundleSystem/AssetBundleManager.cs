@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.IO;
 #if UNITY_EDITOR	
 using UnityEditor;
 #endif
@@ -24,13 +25,13 @@ public class LoadedAssetBundle
 {
 	public AssetBundle m_AssetBundle;
 	public int m_ReferencedCount;
-	public WWW m_WWW;
+	public AssetBundleCreateRequest m_Request;
 
-	public LoadedAssetBundle(WWW www)
+	public LoadedAssetBundle(AssetBundleCreateRequest request)
 	{
 		m_AssetBundle = null;
 		m_ReferencedCount = 1;
-		m_WWW = www;
+		m_Request = request;
 	}
 }
 
@@ -213,18 +214,21 @@ public class AssetBundleManager : MonoBehaviour
 
 			return false;
 		}
-
-		WWW download = null;
+		
+		AssetBundleCreateRequest request = null;
 		string url = m_BaseDownloadingURL + assetBundleName;
 
 		// For manifest assetbundle, always download it as we don't have hash for it.
 		if (isLoadingAssetBundleManifest)
-			download = new WWW(url);
+		{
+			request = AssetBundle.LoadFromFileAsync(url);
+		}
 		else
-			download = WWW.LoadFromCacheOrDownload(url, m_AssetBundleManifest.GetAssetBundleHash(assetBundleName), 0); 
+		{
+			request = AssetBundle.LoadFromFileAsync(url);
+		}
 
-		m_LoadedAssetBundles.Add( assetBundleName, new LoadedAssetBundle( download ) );
-
+		m_LoadedAssetBundles.Add(assetBundleName, new LoadedAssetBundle(request));
 		return false;
 	}
 
@@ -310,26 +314,17 @@ public class AssetBundleManager : MonoBehaviour
 		var keysToRemove = new List<string>();
 		foreach (var keyValue in m_LoadedAssetBundles)
 		{
-			WWW download = keyValue.Value.m_WWW;
+			AssetBundleCreateRequest request = keyValue.Value.m_Request;
 
-			if (download == null)
+			if (request == null)
 			{
 				continue;
 			}
 
-			// If downloading fails.
-			if ( download.error != null )
+			// If succeeds.
+			if (request.isDone )
 			{
-				m_DownloadingErrors.Add( keyValue.Key, download.error );
-				keysToRemove.Add( keyValue.Key );
-				continue;
-			}
-
-			// If downloading succeeds.
-			if ( download.isDone )
-			{
-				//Debug.Log("Downloading " + keyValue.Key + " is done at frame " + Time.frameCount);
-				keyValue.Value.m_AssetBundle = download.assetBundle;
+				keyValue.Value.m_AssetBundle = request.assetBundle;
 				keysToRemove.Add( keyValue.Key );
 			}
 		}
@@ -337,9 +332,7 @@ public class AssetBundleManager : MonoBehaviour
 		// Remove the finished WWWs.
 		foreach( var key in keysToRemove)
 		{
-			WWW download = m_LoadedAssetBundles[key].m_WWW;
-			m_LoadedAssetBundles[key].m_WWW = null;
-			download.Dispose();
+			m_LoadedAssetBundles[key].m_Request = null;
 		}
 
 		// Update all in progress operations

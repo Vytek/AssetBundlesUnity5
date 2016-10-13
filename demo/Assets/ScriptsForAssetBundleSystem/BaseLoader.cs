@@ -45,15 +45,15 @@ public class BaseLoader : MonoBehaviour {
 	public string GetRelativePath()
 	{
 		if (Application.isEditor)
-			return "file://" + System.Environment.CurrentDirectory.Replace("\\", "/"); // Use the build output folder directly.
+			return System.Environment.CurrentDirectory.Replace("\\", "/"); // Use the build output folder directly.
 		else if (Application.isWebPlayer)
 			return System.IO.Path.GetDirectoryName(Application.absoluteURL).Replace("\\", "/") + "/StreamingAssets";
 		else if (Application.platform == RuntimePlatform.IPhonePlayer)
-			return "file://" + Application.streamingAssetsPath;
+			return Application.streamingAssetsPath;
 		else if (Application.isMobilePlatform || Application.isConsolePlatform)
 			return Application.streamingAssetsPath;
 		else // For standalone player.
-			return "file://" + Application.streamingAssetsPath;
+			return Application.streamingAssetsPath;
 	}
 
 #if UNITY_EDITOR
