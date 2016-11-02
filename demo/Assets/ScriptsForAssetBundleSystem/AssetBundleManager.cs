@@ -361,7 +361,15 @@ public class AssetBundleManager : MonoBehaviour
 #if UNITY_EDITOR
 		if (SimulateAssetBundleInEditor)
 		{
-			string[] assetPaths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(assetBundleName, assetName);
+			string[] assetPaths;
+			if (string.IsNullOrEmpty(assetName))
+			{
+				assetPaths = AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleName);
+			}
+			else
+			{
+				assetPaths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(assetBundleName, assetName);
+			}
 			if (assetPaths.Length == 0)
 			{
 				Debug.LogError("There is no asset with name \"" + assetName + "\" in " + assetBundleName);

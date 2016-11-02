@@ -41,6 +41,11 @@ public class AssetLoader : BaseLoader
 		ms_Instance.StartCoroutine(LoadAutoUnload(assetBundleName, assetName, callback));
 	}
 
+	public static void LoadAssetAsync(string assetBundleName, Action<UnityEngine.Object> callback)
+	{
+		ms_Instance.StartCoroutine(LoadAutoUnload(assetBundleName, string.Empty, callback));
+	}
+
 	protected static IEnumerator LoadAutoUnload(string assetBundleName, string assetName, Action<UnityEngine.Object> callback)
 	{
 		yield return ms_Instance.Load(assetBundleName, assetName, callback);

@@ -155,6 +155,10 @@ public class AssetBundleLoadAssetOperationFull : AssetBundleLoadAssetOperation
 		LoadedAssetBundle bundle = AssetBundleManager.GetLoadedAssetBundle (m_AssetBundleName, out m_DownloadingError);
 		if (bundle != null)
 		{
+			if (string.IsNullOrEmpty(m_AssetName))
+			{
+				m_AssetName = bundle.m_AssetBundle.GetAllAssetNames()[0];
+			}
 			m_Request = bundle.m_AssetBundle.LoadAssetAsync (m_AssetName, m_Type);
 			return false;
 		}
