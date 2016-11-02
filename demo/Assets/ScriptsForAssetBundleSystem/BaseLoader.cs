@@ -111,7 +111,7 @@ public class BaseLoader : MonoBehaviour {
 
 		// Get the asset.
 		UnityEngine.Object prefab = request.GetAsset<UnityEngine.Object>();
-		Debug.Log(assetName + (prefab == null ? " isn't" : " is")+ " loaded successfully at frame " + Time.frameCount );
+		Debug.Log((string.IsNullOrEmpty(assetName) ? assetBundleName : assetName) + (prefab == null ? " isn't" : " is")+ " loaded successfully at frame " + Time.frameCount );
 
 		if (prefab != null && callback != null)
 		{
